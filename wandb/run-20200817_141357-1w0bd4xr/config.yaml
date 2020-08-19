@@ -1,0 +1,27 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.8.31
+    framework: keras
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.7.7
+dataset:
+  desc: null
+  value: AlzheimerT2SmallDataset
+experiment_group:
+  desc: null
+  value: null
+model:
+  desc: null
+  value: MultiClassCNN
+network:
+  desc: null
+  value: lenet
+train_args:
+  desc: null
+  value:
+    batch_size: 8
+    epochs: 10
