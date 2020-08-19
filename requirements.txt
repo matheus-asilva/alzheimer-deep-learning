@@ -140,8 +140,8 @@ stevedore==1.32.0
 subprocess32==3.5.4
 tensorboard==2.2.0
 tensorboard-plugin-wit==1.6.0.post2
-tensorflow==2.2.0rc2
-tensorflow-estimator==2.2.0rc0
+# tensorflow==2.2.0rc2
+# tensorflow-estimator==2.2.0rc0
 termcolor==1.1.0
 terminado==0.8.3
 testpath==0.4.4
