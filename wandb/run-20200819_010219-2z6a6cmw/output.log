@@ -1,89 +1,0 @@
-W&B Run: https://app.wandb.ai/matheus-asilva/alzheimer-dl/runs/2z6a6cmw
-Model: "model"
-_________________________________________________________________
-Layer (type)                 Output Shape              Param #   
-=================================================================
-block1_conv1_input (InputLay [(None, 224, 224, 3)]     0         
-_________________________________________________________________
-block1_conv1 (Conv2D)        (None, 224, 224, 64)      1792      
-_________________________________________________________________
-block1_conv2 (Conv2D)        (None, 224, 224, 64)      36928     
-_________________________________________________________________
-block1_pool (MaxPooling2D)   (None, 112, 112, 64)      0         
-_________________________________________________________________
-block2_conv1 (Conv2D)        (None, 112, 112, 128)     73856     
-_________________________________________________________________
-block2_conv2 (Conv2D)        (None, 112, 112, 128)     147584    
-_________________________________________________________________
-block2_pool (MaxPooling2D)   (None, 56, 56, 128)       0         
-_________________________________________________________________
-block3_conv1 (Conv2D)        (None, 56, 56, 256)       295168    
-_________________________________________________________________
-block3_conv2 (Conv2D)        (None, 56, 56, 256)       590080    
-_________________________________________________________________
-block3_conv3 (Conv2D)        (None, 56, 56, 256)       590080    
-_________________________________________________________________
-block3_pool (MaxPooling2D)   (None, 28, 28, 256)       0         
-_________________________________________________________________
-block4_conv1 (Conv2D)        (None, 28, 28, 512)       1180160   
-_________________________________________________________________
-block4_conv2 (Conv2D)        (None, 28, 28, 512)       2359808   
-_________________________________________________________________
-block4_conv3 (Conv2D)        (None, 28, 28, 512)       2359808   
-_________________________________________________________________
-block4_pool (MaxPooling2D)   (None, 14, 14, 512)       0         
-_________________________________________________________________
-block5_conv1 (Conv2D)        (None, 14, 14, 512)       2359808   
-_________________________________________________________________
-block5_conv2 (Conv2D)        (None, 14, 14, 512)       2359808   
-_________________________________________________________________
-block5_conv3 (Conv2D)        (None, 14, 14, 512)       2359808   
-_________________________________________________________________
-block5_pool (MaxPooling2D)   (None, 7, 7, 512)         0         
-_________________________________________________________________
-pool (AveragePooling2D)      (None, 1, 1, 512)         0         
-_________________________________________________________________
-flatten (Flatten)            (None, 512)               0         
-_________________________________________________________________
-dense (Dense)                (None, 64)                32832     
-_________________________________________________________________
-dropout (Dropout)            (None, 64)                0         
-_________________________________________________________________
-predictions (Dense)          (None, 3)                 195       
-=================================================================
-Total params: 14,747,715
-Trainable params: 33,027
-Non-trainable params: 14,714,688
-_________________________________________________________________
-Epoch 1/10
-      1/Unknown - 0s 0s/step - loss: 19.2687 - auc: 0.2734 - cat_accuracy: 0.1250      2/Unknown - 1s 519ms/step - loss: 13.4410 - auc: 0.3848 - cat_accuracy: 0.1875      3/Unknown - 2s 687ms/step - loss: 10.7909 - auc: 0.4835 - cat_accuracy: 0.2917      4/Unknown - 3s 776ms/step - loss: 9.5316 - auc: 0.5146 - cat_accuracy: 0.3438       5/Unknown - 4s 831ms/step - loss: 9.4170 - auc: 0.5153 - cat_accuracy: 0.3750      6/Unknown - 5s 870ms/step - loss: 9.2167 - auc: 0.4838 - cat_accuracy: 0.3333      7/Unknown - 6s 896ms/step - loss: 8.5013 - auc: 0.5061 - cat_accuracy: 0.3214      8/Unknown - 7s 912ms/step - loss: 7.8107 - auc: 0.5409 - cat_accuracy: 0.3594      9/Unknown - 8s 926ms/step - loss: 7.2770 - auc: 0.5582 - cat_accuracy: 0.3889     10/Unknown - 9s 944ms/step - loss: 6.7516 - auc: 0.5819 - cat_accuracy: 0.4250Traceback (most recent call last):
-  File "<stdin>", line 6, in <module>
-  File "D:\TCC\alzheimer-deep-learning\training\util.py", line 46, in train_model
-    _history = model.fit(dataset=dataset, batch_size=batch_size, epochs=epochs, callbacks=callbacks)
-  File "D:\TCC\alzheimer-deep-learning\architecture\models\base.py", line 56, in fit
-    valdation_data=(dataset.X_val, dataset.y_val)
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\keras\engine\training.py", line 66, in _method_wrapper
-    return method(self, *args, **kwargs)
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\keras\engine\training.py", line 785, in fit
-    tmp_logs = train_function(iterator)
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\eager\def_function.py", line 580, in __call__
-    result = self._call(*args, **kwds)
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\eager\def_function.py", line 611, in _call
-    return self._stateless_fn(*args, **kwds)  # pylint: disable=not-callable
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\eager\function.py", line 2420, in __call__
-    return graph_function._filtered_call(args, kwargs)  # pylint: disable=protected-access
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\eager\function.py", line 1665, in _filtered_call
-    self.captured_inputs)
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\eager\function.py", line 1746, in _call_flat
-    ctx, args, cancellation_manager=cancellation_manager))
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\eager\function.py", line 598, in call
-    ctx=ctx)
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\eager\execute.py", line 60, in quick_execute
-    inputs, attrs, num_outputs)
-KeyboardInterrupt
-
-Error in atexit._run_exitfuncs:
-Traceback (most recent call last):
-  File "C:\Users\mathe\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\autograph\pyct\loader.py", line 46, in <lambda>
-    atexit.register(lambda: os.remove(file_name))
-KeyboardInterrupt
