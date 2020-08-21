@@ -8,6 +8,8 @@ from wandb.keras import WandbCallback
 from architecture.datasets.dataset import Dataset
 from architecture.models.base import Model
 
+import numpy as np
+
 EARLY_STOPPING = True
 
 class WandbImageLogger(Callback):
@@ -16,7 +18,9 @@ class WandbImageLogger(Callback):
     def __init__(self, model_wrapper: Model, dataset: Dataset, example_count: int = 10):
         super().__init__()
         self.model_wrapper = model_wrapper
-        self.val_images = dataset.X_val[:example_count]
+
+        example_count = np.random.choice(len(dataset.X_val), example_count).tolist()
+        self.val_images = dataset.X_val[example_count]
 
     def on_epoch_end(self, epoch, logs=None):
         images = [
@@ -31,7 +35,7 @@ def train_model(model: Model, dataset: Dataset, epochs: int = 10, batch_size: in
     callbacks = []
 
     if EARLY_STOPPING:
-        early_stopping = EarlyStopping(monitor='val_loss', min_delta=.01, patience=3, verbose=1, mode='auto')
+        early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min')
         callbacks.append(early_stopping)
     
     if use_wandb:
