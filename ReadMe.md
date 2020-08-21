@@ -27,15 +27,14 @@ $ conda create --name alzheimer-deep-learning --file requirements.txt
 $ conda activate alzheimer-deep-learning
 ```
 
-**3.** Run nii to png converter script:
+**3.** Weights and Biases:
+We must create an account on wandb and authenticate it.
 ```bash
-$ python src\nii2png.py --disease AD
+$ wandb init
 ```
+After the authentication, register your name and then the project name as `alzheimer-dl`
 
-Script arguments:
-- `disease`: Type of disease. It could be `AD`, `MCI` or `CN`.
-
-**4.** After converting the images, run training script
+**4.** After the authentication, run
 ```bash
-$ python src\train.py
+$ tasks/run_vgg.sh
 ```

@@ -1,11 +1,11 @@
 from typing import Tuple
-from tensorflow.keras.applications import VGG16
+from tensorflow.keras.applications import VGG19
 from tensorflow.keras.layers import Dense, Flatten, AveragePooling2D, Dropout
 from tensorflow.keras.models import Model
 
-def vgg16(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...], weights: str='imagenet', include_top: bool=False) -> Model:
+def vgg19(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...], weights: str='imagenet', include_top: bool=False) -> Model:
 
-    base_model = VGG16(weights=weights, include_top=include_top, input_tensor=Input(shape=input_shape)
+    base_model = VGG19(weights=weights, include_top=include_top, input_tensor=Input(shape=input_shape)
     if include_top:
         return base_model
     else:
