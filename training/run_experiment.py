@@ -7,14 +7,14 @@ import tensorflow as tf
 
 import wandb
 
-# from training.gpu_manager import GPUManager
+from training.gpu_manager import GPUManager
 
 from training.util import train_model
 
-DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 10}
+DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 100}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
-# experiment_config = {"dataset": "AlzheimerT2SmallDataset", "model": "MultiClassCNN", "network": "vgg16"}
+# experiment_config = {"dataset": "AlzheimerT2SmallDataset", "model": "MultiClassCNN", "network": "mobilenet"}
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
@@ -49,14 +49,13 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     if use_wandb:
         wandb.init(project='alzheimer-dl', config=experiment_config)
     
-    with tf.device('/GPU:0'):
-        train_model(
+    train_model(
             model,
             dataset,
             epochs=experiment_config["train_args"]["epochs"],
             batch_size=experiment_config["train_args"]["batch_size"],
             use_wandb=use_wandb,
-        )
+    )
 
     score = model.evaluate(dataset.X_val, dataset.y_val)
     print(f"Test evaluation: {score}")
@@ -94,9 +93,8 @@ def main():
     args = _parse_args()
     
     if args.gpu < 0:
-        # gpu_manager = GPUManager()
-        # args.gpu = gpu_manager.get_free_gpu()  # Blocks until one is available
-        args.gpu = 0
+        gpu_manager = GPUManager()
+        args.gpu = gpu_manager.get_free_gpu()  # Blocks until one is available
 
     experiment_config = json.loads(args.experiment_config)
     os.environ["CUDA_VISIBLE_DEVICES"] = f"{args.gpu}"

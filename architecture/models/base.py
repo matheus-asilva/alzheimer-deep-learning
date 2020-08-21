@@ -12,6 +12,7 @@ MODELS_PATH = os.path.dirname(os.path.abspath(__file__))
 ARCHITECTURE_PATH = os.path.dirname(MODELS_PATH)
 WEIGHTS_PATH = os.path.join(ARCHITECTURE_PATH, 'weights')
 
+
 class Model:
 
     def __init__(
@@ -47,17 +48,18 @@ class Model:
             callbacks = []
         
         train_augmentation = ImageDataGenerator(rotation_range=15, fill_mode='nearest')
+        train_augmentation.fit(dataset.X_train)
 
         self.network.compile(loss=self.loss(), optimizer=self.optimizer(), metrics=self.metrics())
+
         self.network.fit(
             train_augmentation.flow(dataset.X_train, dataset.y_train, batch_size=batch_size),
             steps_per_epoch=len(dataset.X_train) // batch_size,
             validation_data=(dataset.X_val, dataset.y_val),
-            validation_steps=len(dataset.X_val) // batch_size,
             epochs=epochs,
             callbacks=callbacks
         )
-    
+        
     def evaluate(self, X: np.ndarray, y: np.ndarray, batch_size: int = 8, _verbose: bool = False):
         sequence = ImageDataGenerator(rotation_range=15, fill_mode='nearest').flow(X, y, batch_size=batch_size)
         preds = self.network.predict(sequence)

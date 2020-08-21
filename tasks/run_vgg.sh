@@ -1,1 +1,0 @@
-export PYTHONPATH=. ; python training/run_experiment.py --save "{\"dataset\": \"AlzheimerT2SmallDataset\", \"model\": \"MultiClassCNN\", \"network\": \"vgg16\"}"
