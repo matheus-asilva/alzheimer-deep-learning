@@ -6,11 +6,12 @@
 | Full Name                          | E-mail                     |
 | -----                              | ----------------           |
 | `Matheus de Almeida Silva`         | ms.asilvas1@gmail.com      |
-| `Gabriel Darin Verga`              | gabrieldarin@hotmail.com   |
-| `Mauricio Alves Bedun Junior`      | mauriciobedun@hotmail.com  |
-| `Mauro da Silva Ribeiro`           | msr_hck1@hotmail.com       |
-| `Kaue Santos Bueno`                | kauesb@hotmail.com         |
 | `Matheus Augusto Somera Fernandes` | matheus.somera@gmail.com   |
+| `Mauro da Silva Ribeiro`           | msr_hck1@hotmail.com       |
+| `Gabriel Darin Verga`              | gabrieldarin@hotmail.com   |
+| `Kaue Santos Bueno`                | kauesb@hotmail.com         |
+| `Mauricio Alves Bedun Junior`      | mauriciobedun@hotmail.com  |
+
 
 ## Usage
 See how simple that is to use this service.
