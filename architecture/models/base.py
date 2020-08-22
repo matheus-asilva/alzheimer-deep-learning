@@ -21,6 +21,7 @@ class Model:
         network_fn: Callable[..., KerasModel],
         dataset_args: Dict = None,
         network_args: Dict = None,
+        opt_args: Dict = None
     ):
         self.name = '%s_%s_%s' % (self.__class__.__name__, dataset_cls.__name__, network_fn.__name__)
 
@@ -32,13 +33,17 @@ class Model:
             network_args = {}
         self.network = network_fn(self.data.input_shape, self.data.output_shape, **network_args)
 
+        if len(self.data.mapping) < 2:
+            raise 'Must be 2 or more classes!'
+
     @property
     def image_shape(self):
         return self.data.input_shape
     
     @property
     def weights_filename(self) -> str:
-        os.mkdir(WEIGHTS_PATH, exist_ok=True)
+        if not os.path.exists(WEIGHTS_PATH):
+            os.mkdir(WEIGHTS_PATH)
         return str(os.path.join(WEIGHTS_PATH, '%s_weights.h5' % self.name))
     
     def fit(
@@ -65,14 +70,25 @@ class Model:
         preds = self.network.predict(sequence)
         return np.mean(np.argmax(preds, -1) == np.argmax(y, -1))
     
+    def predict(self, X: np.ndarray, batch_size: int = 8):
+        preds = self.network.predict(X, batch_size=batch_size)
+        return np.argmax(preds, axis=1)
+    
     def loss(self):
-        return 'categorical_crossentropy'
+        if len(self.data.mapping) > 2:
+            return 'categorical_crossentropy'
+        else:
+            return 'binary_crossentropy'
+            
     
     def optimizer(self):
         return Adam()
     
     def metrics(self):
-        return [keras.metrics.AUC(name='auc'), keras.metrics.CategoricalAccuracy(name='cat_accuracy')]
+        if len(self.data.mapping) > 2:
+            return [keras.metrics.AUC(name='auc'), keras.metrics.CategoricalAccuracy(name='cat_accuracy')]
+        else:
+            return [keras.metrics.AUC(name='auc'), keras.metrics.BinaryAccuracy(name='bin_accuracy')]
     
     def load_weights(self):
         self.network.load_weights(self.weights_filename)

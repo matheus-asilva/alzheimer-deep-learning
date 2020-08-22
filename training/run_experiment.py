@@ -4,6 +4,8 @@ import importlib
 from typing import Dict
 import os
 import tensorflow as tf
+import numpy as np
+import gc
 
 import wandb
 
@@ -11,10 +13,17 @@ from training.gpu_manager import GPUManager
 
 from training.util import train_model
 
-DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 100}
+DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 10}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
-# experiment_config = {"dataset": "AlzheimerT2SmallDataset", "dataset_args": {"types": ["CN", "AD"]}, "model": "AlzheimerCNN", "network": "mobilenet"}
+# experiment_config = {
+#     "dataset": "AlzheimerT2SmallDataset", 
+#     "dataset_args": {"types": ["CN", "AD"]}, 
+#     "model": "AlzheimerCNN", 
+#     "network": "vgg16", 
+#     "train_args": {'batch_size': 8, 'epochs': 10},
+#     "opt_args": {'lr': 1e-3, 'decay': 1e-5} # decay: lr / epochs
+# }
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
@@ -33,21 +42,46 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     network_fn_ = getattr(networks_module, experiment_config['network'])
     network_args = experiment_config.get('network_args', {})
 
+    opt_args_ = experiment_config.get('opt_args', DEFAULT_OPT_ARGS)
+
     model = model_class_(
-        dataset_cls=dataset_class_, network_fn=network_fn_, dataset_args=dataset_args, network_args=network_args
+        dataset_cls=dataset_class_, network_fn=network_fn_, dataset_args=dataset_args, network_args=network_args, opt_args=opt_args_
     )
-    
-    print(model)
 
     experiment_config["train_args"] = {
         **DEFAULT_TRAIN_ARGS,
         **experiment_config.get("train_args", {}),
     }
+
+    experiment_config["opt_args"] = {
+        **DEFAULT_OPT_ARGS,
+        **experiment_config.get("opt_args", {}),
+    }
+
     experiment_config["experiment_group"] = experiment_config.get("experiment_group", None)
-    experiment_config["gpu_ind"] = gpu_ind
+    experiment_config["gpu_ind"] = 0
 
     if use_wandb:
-        wandb.init(project='alzheimer-dl', config=experiment_config)
+        dataset_name = {'AlzheimerT2SmallDataset': 't2mini'}
+        tags = []
+        tags.append('-'.join(list(dataset.mapping.values())).lower())
+
+        if dataset.num_classes > 2:
+            tags.append('binary')
+        else:
+            tags.append('multiclass')
+
+        wandb.init(
+            project='alzheimer-dl',
+            config=experiment_config,
+            name='{model} {dataset} {epochs}ep {batch_size}bs'.format(
+                model=('multi ' if dataset.num_classes > 2 else 'bin ') + experiment_config['network'],
+                dataset=dataset_name[experiment_config['dataset']],
+                epochs=experiment_config["train_args"]["epochs"],
+                batch_size=experiment_config["train_args"]["batch_size"],
+                tags=tags
+            )
+        )
     
     train_model(
             model,
@@ -57,11 +91,10 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
             use_wandb=use_wandb,
     )
 
-    # score = model.evaluate(dataset.X_val, dataset.y_val)
-    # print(f"Test evaluation: {score}")
-
-    # if use_wandb:
-    #     wandb.log({"test_metric": score})
+    if use_wandb:
+        y_preds = model.predict(X=dataset.X_val, batch_size=experiment_config["train_args"]["batch_size"])
+        classes = list(dataset.mapping.values())
+        wandb.log({"confusion_matrix": wandb.sklearn.plot_confusion_matrix(np.argmax(dataset.y_val, axis=1), y_preds, classes)})
 
     if save_weights:
         model.save_weights()
@@ -103,3 +136,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    gc.collect()
