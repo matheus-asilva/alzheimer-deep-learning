@@ -26,10 +26,8 @@ ESSENTIALS_FILENAME = Path(os.path.join(os.path.abspath('.'), 'architecture', 'd
 ESSENTIALS_FILENAME = Path(__file__).parents[0].resolve() / 'alzheimer_essentials.json'
 
 class AlzheimerT2Dataset(Dataset):
-    def __init__(self):
-        with open(ESSENTIALS_FILENAME) as f:
-            essentials = json.load(f)
-        self.mapping = dict(essentials['mapping'])
+    def __init__(self, types=['CN', 'MCI', 'AD']):
+        self.mapping = {key: value for key, value in enumerate(types, 0)}
         self.inverse_mapping = {value: key for key, value in self.mapping.items()}
         self.num_classes = len(self.mapping)
         self.input_shape = tuple(essentials['input_shape'])
@@ -43,15 +41,21 @@ class AlzheimerT2Dataset(Dataset):
     def load_images(self, path):
         data = []
         labels = []
-        for image_path in tqdm(list(paths.list_images(path))):
+        input_shape = self.input_shape[:2] if len(self.input_shape) > 2 else self.input_shape
+
+        dirs = list(paths.list_images(path))
+        dirs = [x for x in dirs if x.split(os.path.sep)[-2] in self.mapping.values()]
+
+        for image_path in tqdm(dirs):
             label = image_path.split(os.path.sep)[-2]
+            
+            if label in self.mapping.values():
+                image = cv2.imread(image_path)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = cv2.resize(image, input_shape)
 
-            image = cv2.imread(image_path)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = cv2.resize(image, self.input_shape)
-
-            data.append(image)
-            labels.append(label)
+                data.append(image)
+                labels.append(label)
         
         labels = pd.Series(labels).map(self.inverse_mapping)
 

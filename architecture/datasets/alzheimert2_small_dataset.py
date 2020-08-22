@@ -26,10 +26,10 @@ ESSENTIALS_FILENAME = Path(os.path.join(os.path.abspath('.'), 'architecture', 'd
 ESSENTIALS_FILENAME = Path(__file__).parents[0].resolve() / 'alzheimer_essentials.json'
 
 class AlzheimerT2SmallDataset(Dataset):
-    def __init__(self):
+    def __init__(self, types=['CN', 'MCI', 'AD']):
         with open(ESSENTIALS_FILENAME) as f:
             essentials = json.load(f)
-        self.mapping = dict(essentials['mapping'])
+        self.mapping = {key: value for key, value in enumerate(types, 0)}
         self.inverse_mapping = {value: key for key, value in self.mapping.items()}
         self.num_classes = len(self.mapping)
         self.input_shape = tuple(essentials['input_shape'])
@@ -45,15 +45,19 @@ class AlzheimerT2SmallDataset(Dataset):
         labels = []
         input_shape = self.input_shape[:2] if len(self.input_shape) > 2 else self.input_shape
 
-        for image_path in tqdm(list(paths.list_images(path))):
+        dirs = list(paths.list_images(path))
+        dirs = [x for x in dirs if x.split(os.path.sep)[-2] in self.mapping.values()]
+
+        for image_path in tqdm(dirs):
             label = image_path.split(os.path.sep)[-2]
+            
+            if label in self.mapping.values():
+                image = cv2.imread(image_path)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = cv2.resize(image, input_shape)
 
-            image = cv2.imread(image_path)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = cv2.resize(image, input_shape)
-
-            data.append(image)
-            labels.append(label)
+                data.append(image)
+                labels.append(label)
         
         labels = pd.Series(labels).map(self.inverse_mapping)
 
@@ -70,14 +74,6 @@ class AlzheimerT2SmallDataset(Dataset):
         print('Reading validation images...')
         self.X_val, self.y_val = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'validation'))
         self.y_val = to_categorical(self.y_val, self.num_classes)
-    
-    # @cachedproperty
-    # def y_train(self):
-    #     return to_categorical(self.y_train, self.num_classes)
-
-    # @cachedproperty
-    # def y_val(self):
-    #     return to_categorical(self.y_val, self.num_classes)
     
     def __repr__(self):
         return f'Alzheimer T2 MRI Small Dataset\nNum classes: {self.num_classes}\nMapping: {self.mapping}\nInput shape: {self.input_shape}'

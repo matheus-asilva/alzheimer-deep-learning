@@ -1,1 +1,1 @@
-from .multiclass_cnn import MultiClassCNN
+from .alzheimer_cnn import AlzheimerCNN

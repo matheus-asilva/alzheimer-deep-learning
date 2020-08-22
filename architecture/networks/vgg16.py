@@ -11,12 +11,13 @@ def vgg16(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...], weig
         return base_model
     else:
         # Construct the head of the model that will be placed on top of the base model
+        num_classes = output_shape[0]
         head_model=base_model.output
         head_model=AveragePooling2D(pool_size=(4, 4))(head_model)
         head_model=Flatten(name='flatten')(head_model)
         head_model=Dense(64, activation='relu')(head_model)
         head_model=Dropout(0.5)(head_model)
-        head_model=Dense(3, activation='softmax')(head_model)
+        head_model=Dense(num_classes, activation='softmax')(head_model)
 
         # Place the head Fully Connected model on top of the base model (actual model)
         model=Model(base_model.input, head_model)

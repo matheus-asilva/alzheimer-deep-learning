@@ -6,7 +6,7 @@ from architecture.models.base import Model
 from architecture.networks import vgg16, lenet
 from architecture.datasets.alzheimert2_small_dataset import AlzheimerT2SmallDataset
 
-class MultiClassCNN(Model):
+class AlzheimerCNN(Model):
     
     def __init__(
         self,

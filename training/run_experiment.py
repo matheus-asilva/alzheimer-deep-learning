@@ -14,7 +14,7 @@ from training.util import train_model
 DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 100}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
-# experiment_config = {"dataset": "AlzheimerT2SmallDataset", "model": "MultiClassCNN", "network": "mobilenet"}
+# experiment_config = {"dataset": "AlzheimerT2SmallDataset", "dataset_args": {"types": ["CN", "AD"]}, "model": "AlzheimerCNN", "network": "mobilenet"}
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
@@ -57,11 +57,11 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
             use_wandb=use_wandb,
     )
 
-    score = model.evaluate(dataset.X_val, dataset.y_val)
-    print(f"Test evaluation: {score}")
+    # score = model.evaluate(dataset.X_val, dataset.y_val)
+    # print(f"Test evaluation: {score}")
 
-    if use_wandb:
-        wandb.log({"test_metric": score})
+    # if use_wandb:
+    #     wandb.log({"test_metric": score})
 
     if save_weights:
         model.save_weights()
