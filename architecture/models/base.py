@@ -38,7 +38,7 @@ class Model:
     
     @property
     def weights_filename(self) -> str:
-        os.mkdir(WEIGHTS_PATH, parents=True, exist_ok=True)
+        os.mkdir(WEIGHTS_PATH, exist_ok=True)
         return str(os.path.join(WEIGHTS_PATH, '%s_weights.h5' % self.name))
     
     def fit(

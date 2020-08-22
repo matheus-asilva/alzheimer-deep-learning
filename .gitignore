@@ -3,4 +3,4 @@ __pycache__
 *.zip
 *.png
 run-*/
-.log
+*.log

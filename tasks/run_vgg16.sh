@@ -1,1 +1,1 @@
-export PYTHONPATH=. ; python3 training/run_experiment.py --save "{\"dataset\": \"AlzheimerT2SmallDataset\", \"dataset_args\": {\"types\": [\"CN\", \"MCI\", \"AD\"]}, \"model\": \"MultiClassCNN\", \"network\": \"vgg16\"}"
+export PYTHONPATH=. ; python3 training/run_experiment.py --save "{\"dataset\": \"AlzheimerT2SmallDataset\", \"dataset_args\": {\"types\": [\"CN\", \"MCI\", \"AD\"]}, \"model\": \"AlzheimerCNN\", \"network\": \"vgg16\"}"
