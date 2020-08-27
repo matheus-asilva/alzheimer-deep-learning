@@ -17,10 +17,10 @@ DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 10}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
 # experiment_config = {
-#     "dataset": "AlzheimerT2SmallDataset", 
-#     "dataset_args": {"types": ["CN", "AD"]}, 
+#     "dataset": "AlzheimerT2StarSmallDataset", 
+#     "dataset_args": {"types": ["CN", "MCI", "AD"]}, 
 #     "model": "AlzheimerCNN", 
-#     "network": "vgg16", 
+#     "network": "mobilenet", 
 #     "train_args": {'batch_size': 8, 'epochs': 10},
 #     "opt_args": {'lr': 1e-3, 'decay': 1e-5} # decay: lr / epochs
 # }
@@ -62,7 +62,11 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     experiment_config["gpu_ind"] = 0
 
     if use_wandb:
-        dataset_name = {'AlzheimerT2SmallDataset': 't2mini'}
+        dataset_name = {
+            'AlzheimerT2SmallDataset': 't2mini',
+            'AlzheimerT2StarSmallDataset': 't2starmini',
+            'AlzheimerT2StarFullDataset': 't2starfull'
+        }
         tags = []
         tags.append('-'.join(list(dataset.mapping.values())).lower())
 

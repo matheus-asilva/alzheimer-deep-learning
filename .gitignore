@@ -5,3 +5,4 @@ __pycache__
 run-*/
 wandb/
 *.h5
+other_scripts/

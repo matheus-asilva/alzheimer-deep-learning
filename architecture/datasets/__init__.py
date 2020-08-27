@@ -1,1 +1,3 @@
 from .alzheimert2_small_dataset import AlzheimerT2SmallDataset
+from .alzheimert2_star_small_dataset import AlzheimerT2StarSmallDataset
+from .alzheimert2_star_full_dataset import AlzheimerT2StarFullDataset
