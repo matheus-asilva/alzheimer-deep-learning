@@ -6,3 +6,5 @@ run-*/
 wandb/
 *.h5
 other_scripts/
+.floyd*
+floyd.yml
