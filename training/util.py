@@ -30,7 +30,7 @@ class WandbImageLogger(Callback):
         wandb.log({'examples': images}, commit=False)
     
 
-def train_model(model: Model, dataset: Dataset, epochs: int = 10, batch_size: int = 8, use_wandb: bool = False) -> Model:
+def train_model(model: Model, dataset: Dataset, epochs: int = 10, batch_size: int = 8, use_wandb: bool = False, use_class_weights = False) -> Model:
     """Train model"""
     callbacks = []
 
@@ -47,7 +47,7 @@ def train_model(model: Model, dataset: Dataset, epochs: int = 10, batch_size: in
     model.network.summary()
 
     t = time()
-    _history = model.fit(dataset=dataset, batch_size=batch_size, epochs=epochs, callbacks=callbacks)
+    _history = model.fit(dataset=dataset, batch_size=batch_size, epochs=epochs, callbacks=callbacks, use_class_weights=use_class_weights)
     print('Training took {:2f} minutes'.format((time() - t) / 60))
 
     return model

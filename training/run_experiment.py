@@ -7,6 +7,8 @@ import tensorflow as tf
 import numpy as np
 import gc
 
+from sklearn.utils import class_weight
+
 import wandb
 
 from training.gpu_manager import GPUManager
@@ -21,7 +23,7 @@ DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 #     "dataset_args": {"types": ["CN", "MCI", "AD"]}, 
 #     "model": "AlzheimerCNN", 
 #     "network": "mobilenet", 
-#     "train_args": {'batch_size': 8, 'epochs': 10},
+#     "train_args": {'batch_size': 8, 'epochs': 10, 'use_class_weights': True},
 #     "opt_args": {'lr': 1e-3, 'decay': 1e-5} # decay: lr / epochs
 # }
 
@@ -34,7 +36,7 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     dataset = dataset_class_(**dataset_args)
     dataset.load_or_generate_data()
     print(dataset)
-    
+
     models_module = importlib.import_module('architecture.models')
     model_class_ = getattr(models_module, experiment_config['model'])
 
@@ -59,7 +61,7 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     }
 
     experiment_config["experiment_group"] = experiment_config.get("experiment_group", None)
-    experiment_config["gpu_ind"] = 0
+    experiment_config["gpu_ind"] = gpu_ind
 
     if use_wandb:
         dataset_name = {
@@ -86,13 +88,14 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
                 tags=tags
             )
         )
-    
+
     train_model(
             model,
             dataset,
             epochs=experiment_config["train_args"]["epochs"],
             batch_size=experiment_config["train_args"]["batch_size"],
             use_wandb=use_wandb,
+            use_class_weights=experiment_config["train_args"]["use_class_weights"]
     )
 
     if use_wandb:

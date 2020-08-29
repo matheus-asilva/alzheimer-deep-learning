@@ -5,6 +5,8 @@ from tensorflow.keras.optimizers import Adam
 import keras
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+from sklearn.utils import class_weight
+
 import numpy as np
 import os
 
@@ -33,6 +35,8 @@ class Model:
             network_args = {}
         self.network = network_fn(self.data.input_shape, self.data.output_shape, **network_args)
 
+        self.opt_args = opt_args
+
         if len(self.data.mapping) < 2:
             raise 'Must be 2 or more classes!'
 
@@ -47,7 +51,7 @@ class Model:
         return str(os.path.join(WEIGHTS_PATH, '%s_weights.h5' % self.name))
     
     def fit(
-        self, dataset, batch_size: int = 8, epochs: int = 10, callbacks: list = None
+        self, dataset, batch_size: int = 8, epochs: int = 10, callbacks: list = None, use_class_weights: bool = False
     ):
         if callbacks is None:
             callbacks = []
@@ -57,12 +61,19 @@ class Model:
 
         self.network.compile(loss=self.loss(), optimizer=self.optimizer(), metrics=self.metrics())
 
+        if use_class_weights:
+            class_weights = class_weight.compute_class_weight('balanced', np.unique(np.argmax(dataset.y_train, axis=1)), np.argmax(dataset.y_train, axis=1))
+            class_weights = {key:value for key, value in enumerate(class_weights, 0)}
+        else:
+            class_weights = None
+
         self.network.fit(
             train_augmentation.flow(dataset.X_train, dataset.y_train, batch_size=batch_size),
             steps_per_epoch=len(dataset.X_train) // batch_size,
             validation_data=(dataset.X_val, dataset.y_val),
             epochs=epochs,
-            callbacks=callbacks
+            callbacks=callbacks,
+            class_weight=class_weights
         )
         
     def evaluate(self, X: np.ndarray, y: np.ndarray, batch_size: int = 8, _verbose: bool = False):
@@ -82,7 +93,8 @@ class Model:
             
     
     def optimizer(self):
-        return Adam()
+        print(self.opt_args)
+        return Adam(**self.opt_args)
     
     def metrics(self):
         if len(self.data.mapping) > 2:
