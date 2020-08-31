@@ -64,16 +64,18 @@ class AlzheimerT2SmallDataset(Dataset):
         return np.array(data), np.array(labels)
         
     def load_or_generate_data(self):
-        if 'alzheimer_t2mri_small' not in os.listdir(os.path.join('data', 'processed')):
+        if 'alzheimer_t2mri_star_full' not in os.listdir(os.path.join('data', 'processed')):
             _download_and_process_alzheimer_t2mri()
         
         print('Reading training images...')
         self.X_train, self.y_train = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'train'))
-        self.y_train = to_categorical(self.y_train, self.num_classes)
         
         print('Reading validation images...')
         self.X_val, self.y_val = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'validation'))
-        self.y_val = to_categorical(self.y_val, self.num_classes)
+
+        if self.num_classes > 2:
+            self.y_train = to_categorical(self.y_train, self.num_classes)
+            self.y_val = to_categorical(self.y_val, self.num_classes)
     
     def __repr__(self):
         return f'Alzheimer T2 MRI Small Dataset\nNum classes: {self.num_classes}\nMapping: {self.mapping}\nInput shape: {self.input_shape}'

@@ -17,7 +17,13 @@ def resnet152v2(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...]
         head_model=Flatten(name='flatten')(head_model)
         head_model=Dense(64, activation='relu')(head_model)
         head_model=Dropout(0.5)(head_model)
-        head_model=Dense(num_classes, activation='softmax')(head_model)
+        
+        if num_classes > 2:
+            activation = 'softmax'
+        else:
+            activation = 'sigmoid'
+
+        head_model=Dense(num_classes, activation=activation)(head_model)
 
         # Place the head Fully Connected model on top of the base model (actual model)
         model=Model(base_model.input, head_model)

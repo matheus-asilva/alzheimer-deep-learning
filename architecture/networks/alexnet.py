@@ -43,6 +43,11 @@ def alexnet(input_shape: Tuple[int, ...], output_shape: Tuple[int, ...]) -> Mode
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
 
-    model.add(Dense(num_classes, activation='softmax'))
+    if num_classes > 2:
+            activation = 'softmax'
+    else:
+        activation = 'sigmoid'
+
+    model.add(Dense(num_classes, activation=activation))
 
     return model

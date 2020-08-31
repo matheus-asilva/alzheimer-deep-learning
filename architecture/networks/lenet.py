@@ -20,6 +20,12 @@ def lenet(input_shape: Tuple[int, ...], output_shape: Tuple[int, ...]) -> Model:
     model.add(Flatten())
     model.add(Dense(128, activation="relu"))
     model.add(Dropout(0.2))
-    model.add(Dense(num_classes, activation="softmax"))
+
+    if num_classes > 2:
+            activation = 'softmax'
+    else:
+        activation = 'sigmoid'
+
+    model.add(Dense(num_classes, activation=activation))
 
     return model

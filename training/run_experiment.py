@@ -1,4 +1,3 @@
-import argparse
 import json
 import importlib
 from typing import Dict
@@ -45,6 +44,8 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     network_args = experiment_config.get('network_args', {})
 
     opt_args_ = experiment_config.get('opt_args', DEFAULT_OPT_ARGS)
+    
+    use_class_weights = experiment_config.get('use_class_weights', False)
 
     model = model_class_(
         dataset_cls=dataset_class_, network_fn=network_fn_, dataset_args=dataset_args, network_args=network_args, opt_args=opt_args_
@@ -59,6 +60,8 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
         **DEFAULT_OPT_ARGS,
         **experiment_config.get("opt_args", {}),
     }
+    
+    experiment_config["use_class_weights"] = use_class_weights
 
     experiment_config["experiment_group"] = experiment_config.get("experiment_group", None)
     experiment_config["gpu_ind"] = gpu_ind
@@ -88,15 +91,17 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
                 tags=tags
             )
         )
-
-    train_model(
-            model,
-            dataset,
-            epochs=experiment_config["train_args"]["epochs"],
-            batch_size=experiment_config["train_args"]["batch_size"],
-            use_wandb=use_wandb,
-            use_class_weights=experiment_config["train_args"]["use_class_weights"]
-    )
+    
+    print('Using class weights:', use_class_weights)
+    with tf.device('/GPU:0'):
+        train_model(
+                model,
+                dataset,
+                epochs=experiment_config["train_args"]["epochs"],
+                batch_size=experiment_config["train_args"]["batch_size"],
+                use_wandb=use_wandb,
+                use_class_weights=use_class_weights
+        )
 
     if use_wandb:
         y_preds = model.predict(X=dataset.X_val, batch_size=experiment_config["train_args"]["batch_size"])
@@ -137,7 +142,7 @@ def main():
         args.gpu = gpu_manager.get_free_gpu()  # Blocks until one is available
 
     experiment_config = json.loads(args.experiment_config)
-    os.environ["CUDA_VISIBLE_DEVICES"] = f"{args.gpu}"
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     run_experiment(experiment_config, args.save, args.gpu, use_wandb=not args.nowandb)
 
 

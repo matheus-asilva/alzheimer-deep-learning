@@ -56,8 +56,8 @@ class Model:
         if callbacks is None:
             callbacks = []
         
-        train_augmentation = ImageDataGenerator(rotation_range=15, fill_mode='nearest')
-        train_augmentation.fit(dataset.X_train)
+#         train_augmentation = ImageDataGenerator(rotation_range=15, fill_mode='nearest')
+#         train_augmentation.fit(dataset.X_train)
 
         self.network.compile(loss=self.loss(), optimizer=self.optimizer(), metrics=self.metrics())
 
@@ -68,7 +68,10 @@ class Model:
             class_weights = None
 
         self.network.fit(
-            train_augmentation.flow(dataset.X_train, dataset.y_train, batch_size=batch_size),
+#             train_augmentation.flow(dataset.X_train, dataset.y_train, batch_size=batch_size),
+            x=dataset.X_train,
+            y=dataset.y_train,
+            batch_size=batch_size,
             steps_per_epoch=len(dataset.X_train) // batch_size,
             validation_data=(dataset.X_val, dataset.y_val),
             epochs=epochs,
@@ -93,7 +96,6 @@ class Model:
             
     
     def optimizer(self):
-        print(self.opt_args)
         return Adam(**self.opt_args)
     
     def metrics(self):

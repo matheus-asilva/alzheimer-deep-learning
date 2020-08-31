@@ -4,7 +4,7 @@ from tensorflow.keras.layers import Dense, Flatten, AveragePooling2D, Dropout, I
 from tensorflow.keras.models import Model
 
 
-def mobilenet(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...], weights: str='imagenet', include_top: bool=False) -> Model:
+def full_mobilenet(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...], weights: str='imagenet', include_top: bool=False) -> Model:
 
     base_model = MobileNet(weights=weights, include_top=include_top, input_tensor=Input(shape=input_shape))
     if include_top:
@@ -30,6 +30,6 @@ def mobilenet(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...], 
 
         # Loop over all layers in the base model and freeze them so they won't be updated during the first training process
         for layer in base_model.layers:
-            layer.trainable=False
+            layer.trainable=True
 
         return model
