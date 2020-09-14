@@ -51,32 +51,25 @@ class Model:
         return str(os.path.join(WEIGHTS_PATH, '%s_weights.h5' % self.name))
     
     def fit(
-        self, dataset, batch_size: int = 8, epochs: int = 10, callbacks: list = None, use_class_weights: bool = False
+        self, dataset, batch_size: int = 8, epochs: int = 10, callbacks: list = None
     ):
         if callbacks is None:
             callbacks = []
         
-#         train_augmentation = ImageDataGenerator(rotation_range=15, fill_mode='nearest')
-#         train_augmentation.fit(dataset.X_train)
+        train_augmentation = ImageDataGenerator(rotation_range=15, fill_mode='nearest')
+        train_augmentation.fit(dataset.X_train)
 
         self.network.compile(loss=self.loss(), optimizer=self.optimizer(), metrics=self.metrics())
 
-        if use_class_weights:
-            class_weights = class_weight.compute_class_weight('balanced', np.unique(np.argmax(dataset.y_train, axis=1)), np.argmax(dataset.y_train, axis=1))
-            class_weights = {key:value for key, value in enumerate(class_weights, 0)}
-        else:
-            class_weights = None
-
         self.network.fit(
-#             train_augmentation.flow(dataset.X_train, dataset.y_train, batch_size=batch_size),
-            x=dataset.X_train,
-            y=dataset.y_train,
+            train_augmentation.flow(dataset.X_train, dataset.y_train, batch_size=batch_size),
+            # x=dataset.X_train,
+            # y=dataset.y_train,
             batch_size=batch_size,
             steps_per_epoch=len(dataset.X_train) // batch_size,
             validation_data=(dataset.X_val, dataset.y_val),
             epochs=epochs,
-            callbacks=callbacks,
-            class_weight=class_weights
+            callbacks=callbacks
         )
         
     def evaluate(self, X: np.ndarray, y: np.ndarray, batch_size: int = 8, _verbose: bool = False):

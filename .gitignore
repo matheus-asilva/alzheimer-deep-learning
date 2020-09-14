@@ -8,3 +8,5 @@ wandb/
 other_scripts/
 .floyd*
 floyd.yml
+alzheimer_mprage/
+packages/

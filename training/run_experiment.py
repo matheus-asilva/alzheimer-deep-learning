@@ -22,8 +22,8 @@ DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 #     "dataset_args": {"types": ["CN", "MCI", "AD"]}, 
 #     "model": "AlzheimerCNN", 
 #     "network": "mobilenet", 
-#     "train_args": {'batch_size': 8, 'epochs': 10, 'use_class_weights': True},
-#     "opt_args": {'lr': 1e-3, 'decay': 1e-5} # decay: lr / epochs
+#     "train_args": {'batch_size': 8, 'epochs': 10},
+#     "opt_args": {'lr': 1e-3, 'decay': 1e-5, 'amsgrad':False} # decay: lr / epochs
 # }
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
@@ -44,8 +44,6 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     network_args = experiment_config.get('network_args', {})
 
     opt_args_ = experiment_config.get('opt_args', DEFAULT_OPT_ARGS)
-    
-    use_class_weights = experiment_config.get('use_class_weights', False)
 
     model = model_class_(
         dataset_cls=dataset_class_, network_fn=network_fn_, dataset_args=dataset_args, network_args=network_args, opt_args=opt_args_
@@ -60,8 +58,6 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
         **DEFAULT_OPT_ARGS,
         **experiment_config.get("opt_args", {}),
     }
-    
-    experiment_config["use_class_weights"] = use_class_weights
 
     experiment_config["experiment_group"] = experiment_config.get("experiment_group", None)
     experiment_config["gpu_ind"] = gpu_ind
@@ -92,7 +88,6 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
             )
         )
     
-    print('Using class weights:', use_class_weights)
     with tf.device('/GPU:0'):
         train_model(
                 model,
@@ -100,7 +95,6 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
                 epochs=experiment_config["train_args"]["epochs"],
                 batch_size=experiment_config["train_args"]["batch_size"],
                 use_wandb=use_wandb,
-                use_class_weights=use_class_weights
         )
 
     if use_wandb:
