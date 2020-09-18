@@ -5,8 +5,9 @@ import os
 import tensorflow as tf
 import numpy as np
 import gc
+import argparse
 
-from sklearn.utils import class_weight
+from sklearn.metrics import plot_confusion_matrix
 
 import wandb
 
@@ -17,14 +18,15 @@ from training.util import train_model
 DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 10}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
-# experiment_config = {
-#     "dataset": "AlzheimerT2StarSmallDataset", 
-#     "dataset_args": {"types": ["CN", "MCI", "AD"]}, 
-#     "model": "AlzheimerCNN", 
-#     "network": "mobilenet", 
-#     "train_args": {'batch_size': 8, 'epochs': 10},
-#     "opt_args": {'lr': 1e-3, 'decay': 1e-5, 'amsgrad':False} # decay: lr / epochs
-# }
+experiment_config = {
+    "dataset": "AlzheimerMPRage", 
+    "dataset_args": {"types": ["CN", "AD"]}, 
+    "model": "AlzheimerCNN", 
+    "network": "mobilenet", 
+    "train_args": {'batch_size': 8, 'epochs': 50},
+    "opt_args": {'lr': 1e-3, 'decay': 1e-5, 'amsgrad':False} # decay: lr / epochs
+}
+use_wandb = False
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
@@ -66,7 +68,8 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
         dataset_name = {
             'AlzheimerT2SmallDataset': 't2mini',
             'AlzheimerT2StarSmallDataset': 't2starmini',
-            'AlzheimerT2StarFullDataset': 't2starfull'
+            'AlzheimerT2StarFullDataset': 't2starfull',
+            'AlzheimerMPRage': 'mprage'
         }
         tags = []
         tags.append('-'.join(list(dataset.mapping.values())).lower())
@@ -100,7 +103,7 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     if use_wandb:
         y_preds = model.predict(X=dataset.X_val, batch_size=experiment_config["train_args"]["batch_size"])
         classes = list(dataset.mapping.values())
-        wandb.log({"confusion_matrix": wandb.sklearn.plot_confusion_matrix(np.argmax(dataset.y_val, axis=1), y_preds, classes)})
+        wandb.log({"confusion_matrix": plot_confusion_matrix(np.argmax(dataset.y_val, axis=1), y_preds, display_labels=classes)})
 
     if save_weights:
         model.save_weights()
@@ -136,7 +139,7 @@ def main():
         args.gpu = gpu_manager.get_free_gpu()  # Blocks until one is available
 
     experiment_config = json.loads(args.experiment_config)
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+    os.environ["CUDA_VISIBLE_DEVICES"] = f"{args.gpu}"
     run_experiment(experiment_config, args.save, args.gpu, use_wandb=not args.nowandb)
 
 
