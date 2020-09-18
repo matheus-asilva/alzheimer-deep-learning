@@ -55,6 +55,8 @@ class AlzheimerMPRage(Dataset):
                 image = cv2.imread(image_path)
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 image = cv2.resize(image, input_shape)
+                if image.dtype == 'uint8':
+                    image = _normalize_data(image)
 
                 data.append(image)
                 labels.append(label)
@@ -62,23 +64,25 @@ class AlzheimerMPRage(Dataset):
         labels = pd.Series(labels).map(self.inverse_mapping)
 
         return np.array(data), np.array(labels)
-        
+
     def load_or_generate_data(self):
         if 'alzheimer_mprage' not in os.listdir(os.path.join('data', 'processed')):
             _download_and_process_alzheimer_mprage()
         
         print('Reading training images...')
         self.X_train, self.y_train = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'train'))
-        
+        self.y_train = to_categorical(self.y_train, self.num_classes)
+
         print('Reading validation images...')
         self.X_val, self.y_val = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'validation'))
-
-        if self.num_classes > 2:
-            self.y_train = to_categorical(self.y_train, self.num_classes)
-            self.y_val = to_categorical(self.y_val, self.num_classes)
+        self.y_val = to_categorical(self.y_val, self.num_classes)
+        
     
     def __repr__(self):
         return f'Alzheimer MPRage\nNum classes: {self.num_classes}\nMapping: {self.mapping}\nInput shape: {self.input_shape}'
+
+def _normalize_data(data):
+    return data / 255.
 
 def _download_and_process_alzheimer_mprage():
     print('Downloading dataset...')
