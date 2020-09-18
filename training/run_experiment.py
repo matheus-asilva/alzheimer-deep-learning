@@ -7,26 +7,23 @@ import numpy as np
 import gc
 import argparse
 
-from sklearn.metrics import plot_confusion_matrix
-
 import wandb
 
 from training.gpu_manager import GPUManager
-
-from training.util import train_model
+from training.util import train_model, plot_confusion_matrix
 
 DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 10}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
-experiment_config = {
-    "dataset": "AlzheimerMPRage", 
-    "dataset_args": {"types": ["CN", "AD"]}, 
-    "model": "AlzheimerCNN", 
-    "network": "mobilenet", 
-    "train_args": {'batch_size': 8, 'epochs': 50},
-    "opt_args": {'lr': 1e-3, 'decay': 1e-5, 'amsgrad':False} # decay: lr / epochs
-}
-use_wandb = False
+# experiment_config = {
+#     "dataset": "AlzheimerMPRage", 
+#     "dataset_args": {"types": ["CN", "AD"]}, 
+#     "model": "AlzheimerCNN", 
+#     "network": "mobilenet", 
+#     "train_args": {'batch_size': 8, 'epochs': 5},
+#     "opt_args": {'lr': 1e-3, 'decay': 1e-5, 'amsgrad':True} # decay: lr / epochs
+# }
+# use_wandb = False
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
@@ -100,10 +97,11 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
                 use_wandb=use_wandb,
         )
 
+
     if use_wandb:
-        y_preds = model.predict(X=dataset.X_val, batch_size=experiment_config["train_args"]["batch_size"])
         classes = list(dataset.mapping.values())
-        wandb.log({"confusion_matrix": plot_confusion_matrix(np.argmax(dataset.y_val, axis=1), y_preds, display_labels=classes)})
+        cm = plot_confusion_matrix(model, dataset.X_val, dataset.y_val, classes, experiment_config["train_args"]["batch_size"])
+        wandb.log({"confusion_matrix": cm})
 
     if save_weights:
         model.save_weights()
