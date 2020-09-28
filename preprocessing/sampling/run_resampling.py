@@ -1,6 +1,4 @@
 import os
-import re
-import numpy as np
 from tqdm import tqdm
 import shutil
 from itertools import chain
@@ -32,7 +30,7 @@ def save_images(ids, images, disease, sample, output_path):
     # Copia imagens para pasta de destino
     for image in tqdm(paths):
         shutil.copy2(image, root)
-    
+
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -41,7 +39,6 @@ if __name__ == '__main__':
     parser.add_argument("--output_path", help="Output path to send sampled images", required=True)
     parser.add_argument("--sample", help="Type of sample", choices=["train", "validation", "test"], required=True)
     args = parser.parse_args()
-
 
     disease = args.input_path.split(os.path.sep)[-1]
     patient_ids, images = get_unique_ids_and_paths(args.input_path)

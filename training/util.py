@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 EARLY_STOPPING = True
+np.random.seed(42)
 
 class WandbImageLogger(Callback):
     """Custom callback for logging image predictions"""
@@ -32,22 +33,23 @@ class WandbImageLogger(Callback):
             for i, image in enumerate(self.val_images)
         ]
         wandb.log({'examples': images}, commit=False)
-    
+
 
 def train_model(model: Model, dataset: Dataset, epochs: int = 10, batch_size: int = 8, use_wandb: bool = False) -> Model:
     """Train model"""
     callbacks = []
 
     if EARLY_STOPPING:
+        # early_stopping = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=50, verbose=1, mode='min', restore_best_weights=True)
         early_stopping = EarlyStopping(monitor='val_auc', min_delta=0, patience=10, verbose=1, mode='max', restore_best_weights=True)
         callbacks.append(early_stopping)
-    
+
     if use_wandb:
         image_callback = WandbImageLogger(model, dataset)
         wandb_callback = WandbCallback()
         callbacks.append(image_callback)
         callbacks.append(wandb_callback)
-    
+
     model.network.summary()
 
     t = time()
@@ -56,15 +58,17 @@ def train_model(model: Model, dataset: Dataset, epochs: int = 10, batch_size: in
 
     return model
 
+
 def plot_confusion_matrix(model, X, y, classes, batch_size=8, normalize=False, title='Confusion Matrix', cmap=plt.cm.Blues):
-    
+
     if len(y[0]) > 1:
         y = np.argmax(y, axis=1)
-    
+
     y_preds = model.predict(X=X, batch_size=batch_size)
 
     cm = confusion_matrix(y_true=y, y_pred=y_preds)
-    
+
+    plt.figure(figsize=(10, 10))
     g = plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()

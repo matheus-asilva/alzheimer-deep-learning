@@ -2,10 +2,7 @@
 __pycache__
 *.zip
 *.png
-run-*/
+*.nii
 wandb/
 *.h5
-other_scripts/
-.floyd*
-floyd.yml
-debug.log
+*.ppk

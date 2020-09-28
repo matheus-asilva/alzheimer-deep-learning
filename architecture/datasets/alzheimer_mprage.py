@@ -39,7 +39,9 @@ class AlzheimerMPRage(Dataset):
         self.y_train = None
         self.X_val = None
         self.y_val = None
-    
+        self.X_test = None
+        self.y_test = None
+
     def load_images(self, path):
         data = []
         labels = []
@@ -50,7 +52,7 @@ class AlzheimerMPRage(Dataset):
 
         for image_path in tqdm(dirs):
             label = image_path.split(os.path.sep)[-2]
-            
+
             if label in self.mapping.values():
                 image = cv2.imread(image_path)
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -60,7 +62,7 @@ class AlzheimerMPRage(Dataset):
 
                 data.append(image)
                 labels.append(label)
-        
+
         labels = pd.Series(labels).map(self.inverse_mapping)
 
         return np.array(data), np.array(labels)
@@ -68,7 +70,7 @@ class AlzheimerMPRage(Dataset):
     def load_or_generate_data(self):
         if 'alzheimer_mprage' not in os.listdir(os.path.join('data', 'processed')):
             _download_and_process_alzheimer_mprage()
-        
+
         print('Reading training images...')
         self.X_train, self.y_train = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'train'))
         self.y_train = to_categorical(self.y_train, self.num_classes)
@@ -76,8 +78,12 @@ class AlzheimerMPRage(Dataset):
         print('Reading validation images...')
         self.X_val, self.y_val = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'validation'))
         self.y_val = to_categorical(self.y_val, self.num_classes)
-        
-    
+
+        print('Reading test images...')
+        self.X_test, self.y_test = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'test'))
+        self.y_test = to_categorical(self.y_test, self.num_classes)
+
+
     def __repr__(self):
         return f'Alzheimer MPRage\nNum classes: {self.num_classes}\nMapping: {self.mapping}\nInput shape: {self.input_shape}'
 
@@ -95,7 +101,7 @@ def _download_and_process_alzheimer_mprage():
 
 def _process_raw_dataset(filename: str):
     print('Unzipping raw file...')
-    
+
     if not os.path.exists(PROCESSED_DATA_DIRNAME):
         os.mkdir(PROCESSED_DATA_DIRNAME)
 
@@ -106,10 +112,11 @@ def _process_raw_dataset(filename: str):
 def main():
     dataset = AlzheimerMPRage()
     dataset.load_or_generate_data()
-    
+
     print(dataset)
     print('Train dataset:', dataset.X_train.shape, dataset.y_train.shape)
     print('Validation dataset:', dataset.X_val.shape, dataset.y_val.shape)
+    print('Test dataset:', dataset.X_test.shape, dataset.y_test.shape)
 
 
 if __name__ == '__main__':
