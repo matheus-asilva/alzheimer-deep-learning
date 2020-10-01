@@ -16,16 +16,16 @@ import pandas as pd
 from architecture.datasets.dataset import _download_raw_dataset, Dataset
 from architecture.util import download_file_from_google_drive
 
-RAW_DATA_DIRNAME = Dataset.data_dirname() / 'raw' / 'alzheimer_mprage'
-RAW_DATA_FILENAME = Dataset.data_dirname() / 'raw' / 'alzheimer_mprage' / 'alzheimer_mprage.zip'
+RAW_DATA_DIRNAME = Dataset.data_dirname() / 'raw' / 'alzheimer_mprage_deep'
+RAW_DATA_FILENAME = Dataset.data_dirname() / 'raw' / 'alzheimer_mprage_deep' / 'alzheimer_mprage_deep.zip'
 METADATA_FILENAME = RAW_DATA_DIRNAME / 'metadata.toml'
 
-PROCESSED_DATA_DIRNAME = Dataset.data_dirname() / 'processed' / 'alzheimer_mprage'
+PROCESSED_DATA_DIRNAME = Dataset.data_dirname() / 'processed' / 'alzheimer_mprage_deep'
 
 ESSENTIALS_FILENAME = Path(os.path.join(os.path.abspath('.'), 'architecture', 'datasets', 'alzheimer_essentials.json'))
 ESSENTIALS_FILENAME = Path(__file__).parents[0].resolve() / 'alzheimer_essentials.json'
 
-class AlzheimerMPRage(Dataset):
+class AlzheimerMPRageDeep(Dataset):
     def __init__(self, types=['CN', 'MCI', 'AD']):
         with open(ESSENTIALS_FILENAME) as f:
             essentials = json.load(f)
@@ -68,8 +68,8 @@ class AlzheimerMPRage(Dataset):
         return np.array(data), np.array(labels)
 
     def load_or_generate_data(self):
-        if 'alzheimer_mprage' not in os.listdir(os.path.join('data', 'processed')):
-            _download_and_process_alzheimer_mprage()
+        if 'alzheimer_mprage_deep' not in os.listdir(os.path.join('data', 'processed')):
+            _download_and_process_alzheimer_mprage_nodeep()
 
         print('Reading training images...')
         self.X_train, self.y_train = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'train'))
@@ -90,7 +90,7 @@ class AlzheimerMPRage(Dataset):
 def _normalize_data(data):
     return data / 255.
 
-def _download_and_process_alzheimer_mprage():
+def _download_and_process_alzheimer_mprage_nodeep():
     print('Downloading dataset...')
     metadata = toml.load(METADATA_FILENAME)
     curdir = os.getcwd()
@@ -110,7 +110,7 @@ def _process_raw_dataset(filename: str):
         file.close()
 
 def main():
-    dataset = AlzheimerMPRage()
+    dataset = AlzheimerMPRageDeep()
     dataset.load_or_generate_data()
 
     print(dataset)

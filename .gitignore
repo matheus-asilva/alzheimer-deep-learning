@@ -6,3 +6,4 @@ __pycache__
 wandb/
 *.h5
 *.ppk
+*.save

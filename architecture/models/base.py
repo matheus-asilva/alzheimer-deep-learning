@@ -1,11 +1,9 @@
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict
 
 from tensorflow.keras.models import Model as KerasModel
 from tensorflow.keras.optimizers import Adam
 import keras
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
-from sklearn.utils import class_weight
 
 import numpy as np
 import os
@@ -86,7 +84,6 @@ class Model:
             return 'categorical_crossentropy'
         else:
             return 'binary_crossentropy'
-
 
     def optimizer(self):
         return Adam(**self.opt_args)

@@ -3,7 +3,6 @@ import importlib
 from typing import Dict
 import os
 import tensorflow as tf
-import numpy as np
 import gc
 import argparse
 
@@ -28,6 +27,7 @@ DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 #     "opt_args": {'lr': 1e-3, 'decay': 1e-5} # decay: lr / epochs
 # }
 # use_wandb = False
+
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
@@ -70,8 +70,8 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
             'AlzheimerT2SmallDataset': 't2mini',
             'AlzheimerT2StarSmallDataset': 't2starmini',
             'AlzheimerT2StarFullDataset': 't2starfull',
-            'AlzheimerMPRage': 'mprage',
-            'AlzheimerCroppedMPRage': 'cropped_mprage',
+            'AlzheimerMPRageDeep': 'mprage_deep',
+            'AlzheimerMPRageNoDeep': 'mprage_nodeep',
         }
         tags = []
         tags.append('-'.join(list(dataset.mapping.values())).lower())
@@ -102,7 +102,6 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
                 use_wandb=use_wandb,
         )
 
-
     if use_wandb:
         classes = list(dataset.mapping.values())
 
@@ -114,6 +113,7 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
 
     if save_weights:
         model.save_weights()
+
 
 def _parse_args():
     """Parse command-line arguments."""
@@ -137,10 +137,11 @@ def _parse_args():
     args = parser.parse_args()
     return args
 
+
 def main():
     """Run experiment."""
     args = _parse_args()
-    
+
     if args.gpu < 0:
         gpu_manager = GPUManager()
         args.gpu = gpu_manager.get_free_gpu()  # Blocks until one is available

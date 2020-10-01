@@ -16,6 +16,7 @@ class AlzheimerCNN(Model):
         dataset_args: Dict = None,
         network_args: Dict = None,
         opt_args: Dict = None):
+
         """Define the default dataset and network values for this model."""
         super().__init__(dataset_cls, network_fn, dataset_args, network_args, opt_args)
 

@@ -16,7 +16,7 @@ protobuf==3.11.3
 psutil==5.7.0
 redlock-py==1.0.8
 scikit-learn==0.23.2
-tensorflow==2.2.0rc2
+tensorflow-gpu==2.3.1
 toml==0.10.0
 tornado==6.0.4
 tqdm==4.44.1

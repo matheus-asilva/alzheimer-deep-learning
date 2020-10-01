@@ -16,7 +16,7 @@ def mobilenet(input_shape: Tuple[int, int, int], output_shape: Tuple[int, ...], 
         head_model=AveragePooling2D(pool_size=(4, 4))(head_model)
         head_model=Flatten(name='flatten')(head_model)
         head_model=Dense(64, activation='relu')(head_model)
-        head_model=Dropout(0.5)(head_model)
+        head_model=Dropout(0.7)(head_model)
 
         if num_classes > 2:
             activation = 'softmax'
