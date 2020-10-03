@@ -40,8 +40,7 @@ def train_model(model: Model, dataset: Dataset, epochs: int = 10, batch_size: in
     callbacks = []
 
     if EARLY_STOPPING:
-        early_stopping = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=50, verbose=1, mode='min', restore_best_weights=True)
-        # early_stopping = EarlyStopping(monitor='val_auc', min_delta=0, patience=10, verbose=1, mode='max', restore_best_weights=True) # base
+        early_stopping = EarlyStopping(monitor='val_auc', min_delta=0, patience=10, verbose=1, mode='max', restore_best_weights=True) # base
         callbacks.append(early_stopping)
 
     if use_wandb:
