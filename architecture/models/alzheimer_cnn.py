@@ -3,16 +3,16 @@ from typing import Callable, Dict, Tuple
 import numpy as np
 
 from architecture.models.base import Model
-from architecture.networks import vgg16
-from architecture.datasets.alzheimert2_small_dataset import AlzheimerT2SmallDataset
+from architecture.networks import mobilenet
+from architecture.datasets.alzheimer_mprage_nodeep import AlzheimerMPRageNoDeep
 
 
 class AlzheimerCNN(Model):
 
     def __init__(
         self,
-        dataset_cls: type = AlzheimerT2SmallDataset,
-        network_fn: Callable = vgg16,
+        dataset_cls: type = AlzheimerMPRageNoDeep,
+        network_fn: Callable = mobilenet,
         dataset_args: Dict = None,
         network_args: Dict = None,
         opt_args: Dict = None):
