@@ -1,6 +1,7 @@
 from tqdm import tqdm
 import requests
 from typing import Tuple
+import cv2
 
 def download_file_from_google_drive(id, path_to_file):
     URL = 'https://docs.google.com/uc?export=download'
@@ -29,7 +30,7 @@ def download_file_from_google_drive(id, path_to_file):
                     pbar.update(CHUNK_SIZE)
                     f.write(chunk)
 
-def load_image(filepath: str, input_shape: Tuple[int, int] = (224,224)):
+def load_image(filepath: str, input_shape: Tuple[int, int] = (224, 224)):
     image = cv2.imread(filepath)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image = cv2.resize(image, input_shape)
