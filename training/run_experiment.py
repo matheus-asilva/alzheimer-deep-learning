@@ -1,29 +1,33 @@
-import argparse
 import json
 import importlib
 from typing import Dict
 import os
 import tensorflow as tf
-import numpy as np
 import gc
+import argparse
 
 import wandb
 
 from training.gpu_manager import GPUManager
+from training.util import train_model, plot_confusion_matrix
 
-from training.util import train_model
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
+config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 10}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
 # experiment_config = {
-#     "dataset": "AlzheimerT2StarSmallDataset", 
-#     "dataset_args": {"types": ["CN", "MCI", "AD"]}, 
-#     "model": "AlzheimerCNN", 
-#     "network": "mobilenet", 
-#     "train_args": {'batch_size': 8, 'epochs': 10},
+#     "dataset": "AlzheimerCroppedMPRage",
+#     "dataset_args": {"types": ["CN", "AD"]},
+#     "model": "AlzheimerCNN",
+#     "network": "mobilenet",
+#     "train_args": {'batch_size': 8, 'epochs': 5},
 #     "opt_args": {'lr': 1e-3, 'decay': 1e-5} # decay: lr / epochs
 # }
+# use_wandb = False
+
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
@@ -34,7 +38,7 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     dataset = dataset_class_(**dataset_args)
     dataset.load_or_generate_data()
     print(dataset)
-    
+
     models_module = importlib.import_module('architecture.models')
     model_class_ = getattr(models_module, experiment_config['model'])
 
@@ -59,13 +63,15 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
     }
 
     experiment_config["experiment_group"] = experiment_config.get("experiment_group", None)
-    experiment_config["gpu_ind"] = 0
+    experiment_config["gpu_ind"] = gpu_ind
 
     if use_wandb:
         dataset_name = {
             'AlzheimerT2SmallDataset': 't2mini',
             'AlzheimerT2StarSmallDataset': 't2starmini',
-            'AlzheimerT2StarFullDataset': 't2starfull'
+            'AlzheimerT2StarFullDataset': 't2starfull',
+            'AlzheimerMPRageDeep': 'mprage_deep',
+            'AlzheimerMPRageNoDeep': 'mprage_nodeep',
         }
         tags = []
         tags.append('-'.join(list(dataset.mapping.values())).lower())
@@ -86,22 +92,28 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, us
                 tags=tags
             )
         )
-    
-    train_model(
-            model,
-            dataset,
-            epochs=experiment_config["train_args"]["epochs"],
-            batch_size=experiment_config["train_args"]["batch_size"],
-            use_wandb=use_wandb,
-    )
+
+    with tf.device('/GPU:0'):
+        train_model(
+                model,
+                dataset,
+                epochs=experiment_config["train_args"]["epochs"],
+                batch_size=experiment_config["train_args"]["batch_size"],
+                use_wandb=use_wandb,
+        )
 
     if use_wandb:
-        y_preds = model.predict(X=dataset.X_val, batch_size=experiment_config["train_args"]["batch_size"])
         classes = list(dataset.mapping.values())
-        wandb.log({"confusion_matrix": wandb.sklearn.plot_confusion_matrix(np.argmax(dataset.y_val, axis=1), y_preds, classes)})
+
+        cm_val = plot_confusion_matrix(model, dataset.X_val, dataset.y_val, classes, experiment_config["train_args"]["batch_size"])
+        wandb.log({"confusion_matrix - validation data": cm_val})
+
+        cm_test = plot_confusion_matrix(model, dataset.X_test, dataset.y_test, classes, experiment_config["train_args"]["batch_size"])
+        wandb.log({"confusion_matrix - test": cm_test})
 
     if save_weights:
         model.save_weights()
+
 
 def _parse_args():
     """Parse command-line arguments."""
@@ -125,10 +137,11 @@ def _parse_args():
     args = parser.parse_args()
     return args
 
+
 def main():
     """Run experiment."""
     args = _parse_args()
-    
+
     if args.gpu < 0:
         gpu_manager = GPUManager()
         args.gpu = gpu_manager.get_free_gpu()  # Blocks until one is available

@@ -1,14 +1,10 @@
 from typing import Tuple
 from tensorflow.keras.applications import MobileNet
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import AveragePooling2D
-from tensorflow.keras.layers import Dropout
-from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Dense, Flatten, AveragePooling2D, Dropout, Input
 from tensorflow.keras.models import Model
 
 
-def mobilenet(
+def full_mobilenet(
     input_shape: Tuple[int, int, int],
     output_shape: Tuple[int, ...],
     weights: str = 'imagenet',
@@ -20,7 +16,6 @@ def mobilenet(
         include_top=include_top,
         input_tensor=Input(shape=input_shape)
     )
-
     if include_top:
         return base_model
     else:
@@ -30,7 +25,7 @@ def mobilenet(
         head_model = AveragePooling2D(pool_size=(4, 4))(head_model)
         head_model = Flatten(name='flatten')(head_model)
         head_model = Dense(64, activation='relu')(head_model)
-        head_model = Dropout(0.7)(head_model)
+        head_model = Dropout(0.5)(head_model)
 
         if num_classes > 2:
             activation = 'softmax'
@@ -44,6 +39,6 @@ def mobilenet(
 
         # Loop over all layers in the base model and freeze them so they won't be updated during the first training process
         for layer in base_model.layers:
-            layer.trainable = False
+            layer.trainable = True
 
         return model

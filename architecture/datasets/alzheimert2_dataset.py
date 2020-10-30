@@ -62,7 +62,7 @@ class AlzheimerT2Dataset(Dataset):
         return np.array(data), np.array(labels)
         
     def load_or_generate_data(self):
-        if 'alzheimer_t2mri' not in os.listdir(os.path.join('data', 'processed')):
+        if 'alzheimer_t2mri_star_full' not in os.listdir(os.path.join('data', 'processed')):
             _download_and_process_alzheimer_t2mri()
         
         print('Reading training images...')
@@ -70,6 +70,10 @@ class AlzheimerT2Dataset(Dataset):
         
         print('Reading validation images...')
         self.X_val, self.y_val = self.load_images(os.path.join(PROCESSED_DATA_DIRNAME, 'validation'))
+
+        if self.num_classes > 2:
+            self.y_train = to_categorical(self.y_train, self.num_classes)
+            self.y_val = to_categorical(self.y_val, self.num_classes)
     
     @cachedproperty
     def y_train(self):
