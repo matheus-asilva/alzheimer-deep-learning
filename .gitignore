@@ -3,7 +3,9 @@ __pycache__
 *.zip
 *.png
 *.nii
-wandb/
-*.h5
+wandb/*
 *.ppk
+*.save
+*.log
+*.swp
 *.save
