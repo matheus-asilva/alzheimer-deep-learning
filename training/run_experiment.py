@@ -15,19 +15,22 @@ physical_devices = tf.config.experimental.list_physical_devices('GPU')
 assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
 config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 DEFAULT_TRAIN_ARGS = {'batch_size': 8, 'epochs': 10}
 DEFAULT_OPT_ARGS = {'lr': 1e-3, 'decay': 1e-3 / DEFAULT_TRAIN_ARGS['epochs']}
 
 # experiment_config = {
-#     "dataset": "AlzheimerCroppedMPRage",
+#     "dataset": "AlzheimerMPRageNoDeep",
 #     "dataset_args": {"types": ["CN", "AD"]},
 #     "model": "AlzheimerCNN",
 #     "network": "mobilenet",
-#     "train_args": {'batch_size': 8, 'epochs': 5},
-#     "opt_args": {'lr': 1e-3, 'decay': 1e-5} # decay: lr / epochs
+#     "train_args": {'batch_size': 32, 'epochs': 100},
+#     "opt_args": {'lr': 1e-4}
+#     # "opt_args": {'lr': 1e-4, 'decay': 1e-5} # decay: lr / epochs
 # }
 # use_wandb = False
-
+# gpu_ind = 0
 
 def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int, use_wandb: bool = True):
     print(f'Running experiment with config {experiment_config}, on GPU {gpu_ind}')
