@@ -5,6 +5,13 @@ from architecture.models import AlzheimerCNN
 import architecture.util as util
 from architecture.networks.mobilenet import mobilenet
 
+import tensorflow as tf
+
+# Configura memóra para tensorflow
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
+config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
+
 
 class ImagePredictor:
 
