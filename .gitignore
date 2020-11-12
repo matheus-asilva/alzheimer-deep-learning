@@ -11,3 +11,4 @@ wandb/*
 *.save
 *_softmax.h5
 evaluating/predictor_nii.py
+wandb
